@@ -13,11 +13,13 @@
 * básicas para creación de hilos posix
 *------------------------------------------
 */
+#include <iostream>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+using namespace std;
 
 #define NTHREADS 10
 
@@ -26,39 +28,25 @@
 ** Se debe declarar con punteros, debido a que los threads
 ** emplean referencias de memoria.  La información pasa por 
 ** referencia indirecta
-** ---------------------------------------------------------*/
+* ---------------------------------------------------------*/
 void *say_hello(void *threadNumber) {
-	// Declarar la variable local que recibe el parametro
-	//long tID;
-	// Casting del parametro tipo void a la variable local tipo long
-  intptr_t tID;
-  tID = (intptr_t)threadNumber;
-  double numb = sqrt(tID);
-      
-  printf("Hello thread: %ld\n", tID);
-  printf("Raiz cuadrad del thread: %ld\n", numb);
+  long tID;
+  tID = (long)threadNumber;
+  cout << "Sqrt de: " << tID << ", es: " << sqrt(tID)<< endl;
   pthread_exit(NULL);
 }
 /* -----------------------------------------------------------
 ** Programa principal
-** ---------------------------------------------------------*/
+* ---------------------------------------------------------*/
 int main() {
   int rc;
-  long i;
+  long j;
+  int i;
   // Declarar una variable tipo pthread_t
   pthread_t tid[NTHREADS];
-  
-  // Recomendable: declarar tambien un atributo tipo pthread_attr_t
-  pthread_attr_t attr;
-  
-  // Al usar atributos, inicializar el objeto
-  pthread_attr_init(&attr);
-  // Modificar el atributo especifico en este caso el atributo setdetachstate = JOINABLE
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
   for (i=0; i<NTHREADS; i++) {
-    //printf("Main: creating thread %ld\n", i);
-    
+    j = (long)i;
 	/* -----------------------------------------------------------
 	** Al crear un hilo, se pasan los  siguientes parametros:	
 	** el valor del ID, el valor del atributo , la subrutina a
@@ -66,21 +54,19 @@ int main() {
 	** la subrutina:
 	**
 	** pthread_create(&id,NULL,subrutine,(void *)parameter
-	** ---------------------------------------------------------*/
-	rc = pthread_create(&tid[i], &attr, say_hello, (void *)i);
+	* ---------------------------------------------------------*/
+	  rc = pthread_create(&tid[i], NULL, say_hello, (void *)i);
 	
-	// La variable rc recibe errores en formato entero
     if (rc) {              
       printf("ERROR; return code from pthread_create() is %d\n", rc);
       exit(-1);
     }
-
    
   }
   
-  for (i=0; i<NTHREADS; i++) {
+  for (j=0; j<NTHREADS; j++) {
        // Esperar a que cada thread termine en orden
-    rc = pthread_join(tid[i], NULL);
+    rc = pthread_join(tid[j], NULL);
     if (rc) {
       printf("ERROR; return code from pthread_join() is %d\n", rc);
       exit(-1);
@@ -88,9 +74,6 @@ int main() {
       
   }
   printf("Main: program completed. Exiting.\n");
-
-  // Liberar espacios de memoria utilizados para atributo
-  pthread_attr_destroy(&attr);
   pthread_exit(NULL);
 
 }
